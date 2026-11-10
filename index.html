@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>spotted. — find where it’s from</title>
+  <meta name="description" content="spotted: upload any outfit or beauty picture, see every piece identified, find where to buy it and save it to boards.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="promo">new: scan any look and find every piece in seconds</div>
+<header class="top">
+  <div class="top-in">
+    <nav class="nav" aria-label="Main">
+      <a href="#discover" data-nav="discover">Discover</a>
+      <a href="#explore" data-nav="explore">For you</a>
+      <a href="#scan" data-nav="scan">Scan</a>
+      <a href="#saved" data-nav="saved">Boards <span id="saved-count"></span></a>
+      <a href="#about" data-nav="about">About</a>
+    </nav>
+    <a class="wordmark" href="#discover" aria-label="spotted, home">spotted.</a>
+    <div class="top-right">
+      <form class="find" role="search" id="find-form">
+        <label class="sr-only" for="find">Search the feed</label>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="find" type="search" placeholder="search coats, gold, prada…" autocomplete="off">
+      </form>
+      <a class="acct" href="#account" id="acct-chip" data-nav="account"><span class="ini" aria-hidden="true">?</span><span class="acct-lbl">Sign in</span></a>
+      <a class="btn solid" href="#scan">scan a look</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- DISCOVER -->
+  <section id="view-discover" aria-labelledby="h-discover">
+    <div class="hero-video" id="hero">
+      <video id="hero-video" src="assets/hero.mp4" poster="assets/poster.jpg" muted loop playsinline autoplay preload="auto" aria-hidden="true" tabindex="-1"></video>
+      <div class="hero-shade"></div>
+      <div class="hero-copy">
+        <p class="kicker">new · scan any look</p>
+        <h1 id="h-discover">saw it.<br>found it.</h1>
+        <p>upload any outfit or beauty picture. spotted names every piece and sends you to the shops, lookalikes and resale.</p>
+        <div class="row"><a class="pill light" href="#scan">scan a look</a><button class="pill ghost" type="button" id="to-feed">discover</button></div>
+      </div>
+      <button class="vid-toggle" type="button" id="vid-toggle" aria-label="Pause the background video"></button>
+    </div>
+
+    <div class="strip" aria-hidden="true"><div class="strip-track">
+      <span>spot it<i>✶</i>scan it<i>✶</i>shop it<i>✶</i>find where it’s from<i>✶</i></span>
+      <span>spot it<i>✶</i>scan it<i>✶</i>shop it<i>✶</i>find where it’s from<i>✶</i></span>
+    </div></div>
+
+    <div class="feed-head" id="feed-start">
+      <h2>discover<span class="sub">looks people scanned, with every piece identified.</span></h2>
+      <div class="filters" role="group" aria-label="Filter the feed" id="filters"></div>
+    </div>
+    <div id="feed"></div>
+
+    <div class="editorial">
+      <h2>one scan.<br>every piece.</h2>
+      <div>
+        <p>creators spend hours finding and linking every product by hand. spotted does it for you: upload a look and the searches to find each piece are ready.</p>
+        <a class="btn solid" href="#scan">scan a look</a>
+      </div>
+    </div>
+    <div class="how" aria-label="How spotted works">
+      <div><span class="label">01 · upload</span><p>drop a <b>screenshot</b> from pinterest or instagram, or a street-style photo.</p></div>
+      <div><span class="label">02 · identify</span><p>claude reads the image and names every <b>piece</b>: colour, material, and the brand when a logo is visible.</p></div>
+      <div><span class="label">03 · find it</span><p>each piece opens live <b>searches</b> on google shopping, pinterest and resale.</p></div>
+    </div>
+  </section>
+
+  <!-- SCAN -->
+  <section id="view-scan" aria-labelledby="h-scan" hidden>
+    <div class="page-head">
+      <h1 id="h-scan">Scan a look</h1>
+      <p>Drop, paste or choose an image. Nothing is posted until you decide to share it.</p>
+    </div>
+    <div class="scan">
+      <div id="scan-left">
+        <label class="drop" id="drop" for="file">
+          <span class="label">JPG · PNG · WEBP</span>
+          <h2>Drop an image here</h2>
+          <p>or click to choose · you can also paste a screenshot (⌘V / Ctrl+V)</p>
+          <span class="btn solid">Choose image</span>
+        </label>
+        <input id="file" type="file" accept="image/*" class="sr-only">
+      </div>
+      <div id="scan-right">
+        <div class="status">
+          <span class="label">Ready</span>
+          <h2>What you’ll get</h2>
+          <p>Every visible piece, numbered on the image, with a precise description and one-click searches to find it or something close.</p>
+          <p id="cap-note"></p>
+        </div>
+      </div>
+    </div>
+    <div id="scan-result"></div>
+  </section>
+
+  <!-- SAVED -->
+  <section id="view-saved" aria-labelledby="h-saved" hidden>
+    <div class="page-head">
+      <h1 id="h-saved">your boards</h1>
+      <p id="saved-sub">Pieces you saved. Sign in to keep them on your account.</p>
+    </div>
+    <div id="saved-out"></div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section id="view-explore" aria-labelledby="h-explore" hidden>
+    <div class="page-head">
+      <h1 id="h-explore">for you</h1>
+      <p>pieces and looks picked from what you scan, search and save. the more you use spotted, the better it gets.</p>
+    </div>
+    <div id="explore-out"></div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section id="view-account" aria-labelledby="h-account" hidden>
+    <div class="page-head">
+      <h1 id="h-account">Your account</h1>
+      <p>Save your sizes, budget and favourite shops, and keep every look you scan.</p>
+    </div>
+    <div id="account-out"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="view-about" aria-labelledby="h-about" hidden>
+    <div class="page-head">
+      <h1 id="h-about">About SPOTTED</h1>
+      <p>A Pinterest-style feed where the shopping links write themselves.</p>
+    </div>
+    <div class="prose">
+      <p>Creators on shoppable platforms spend hours finding and linking every product by hand. SPOTTED does that step automatically: you upload a look, the pieces are identified, and the searches to find them are ready.</p>
+      <h2>What the results mean</h2>
+      <p><strong>Pieces and descriptions</strong> come from Claude reading the image. They are usually accurate about type, colour and cut, and less certain about fabric.</p>
+      <p><strong>Brands</strong> are only named when a logo, monogram, label or unmistakable signature design is visible, with a confidence level. Otherwise the brand is left blank.</p>
+      <p><strong>Shop links</strong> are live searches built from the description, so they show real products and prices from real shops. They find the item or the closest matches; an exact match is not guaranteed.</p>
+      <p><strong>Google Lens</strong> gives exact visual matches for the whole image. Use “Search the whole look on Google Lens” and drop the same image there.</p>
+      <h2>Privacy</h2>
+      <p>SPOTTED never identifies people in photos. An image you scan is sent to Claude to be read and is only stored if you choose to post it to Discover, where everyone with access to this page can see it.</p>
+      <h2>Your account</h2>
+      <p>Signing in uses your claude.ai account, so SPOTTED never sees or stores a password. Your profile, saved pieces and scan history are private to you: other people using this page cannot read them. You can delete all of it from the Account page at any time.</p>
+      <h2>Credits</h2>
+      <p>Designed and built by Lilia Jdaa Maniari as an individual final project. Built with HTML, CSS and JavaScript, with Claude for image identification.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot"><div class="foot-in">
+  <p class="foot-word" aria-hidden="true">spotted.</p>
+  <div class="foot-col"><h3>navigate</h3><a href="#discover">discover</a><a href="#explore">for you</a><a href="#scan">scan a look</a><a href="#saved">boards</a><a href="#account">account</a><a href="#about">about</a></div>
+  <div class="foot-col"><h3>how it works</h3><p>identification by claude. shop links open live searches in a new tab. spotted never identifies people in photos.</p></div>
+  <div class="foot-base"><span>© 2026 spotted · a student project by lilia jdaa maniari</span><span>find where it’s from.</span></div>
+</div></footer>
+
+<dialog class="sheet" id="sheet" aria-labelledby="look-title">
+  <div class="sheet-bar">
+    <button class="btn small" type="button" id="sheet-close">← Back</button>
+    <span class="label" id="sheet-meta"></span>
+  </div>
+  <div class="sheet-body" id="sheet-body"></div>
+</dialog>
+
+<dialog class="pick" id="boardpick" aria-labelledby="pick-title">
+  <div class="pick-in">
+    <div class="pick-head"><h2 id="pick-title">save to a board</h2><button class="x" type="button" id="pick-close" aria-label="Close">×</button></div>
+    <p class="pick-piece" id="pick-piece"></p>
+    <ul class="pick-list" id="pick-list"></ul>
+    <form class="pick-new" id="pick-new"><label class="sr-only" for="pick-name">New board name</label><input id="pick-name" type="text" maxlength="40" placeholder="new board, e.g. fall 2026"><button class="btn small" type="submit">create</button></form>
+    <div class="pick-foot"><button class="linkish" type="button" id="pick-remove">remove from saved</button><button class="btn solid small" type="button" id="pick-done">done</button></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
