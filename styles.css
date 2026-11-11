@@ -330,6 +330,15 @@ dialog.pick::backdrop { background: var(--scrim); }
 .pick-card .meta { font-size: 12.5px; color: var(--grey); }
 .pick-card .shop { margin-top: 4px; }
 
+/* ---------- Demo ---------- */
+.demo-note { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; margin: 0 0 20px; font-size: 14px; color: var(--grey); }
+.demo-stage { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: transparent; }
+.dtile { position: relative; border: 0; padding: 0; background: none; display: block; }
+.dtile .tile { border-radius: 4px; }
+.dtile .tile em { font-size: clamp(14px, 1.6vw, 22px); letter-spacing: -.04em; }
+.dnum { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; border-radius: 50%; background: var(--cream); color: var(--ink); font-size: 12px; font-weight: 600; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+.dtile:hover .dnum, .dtile.on .dnum { background: var(--ink); color: var(--cream); }
+
 /* ---------- Footer ---------- */
 footer.foot { background: var(--oat); border-top: 1px solid var(--hair); }
 .foot-in { max-width: var(--max); margin: 0 auto; padding: clamp(48px, 7vw, 88px) var(--gutter) 28px; display: grid; gap: 32px; }

@@ -136,11 +136,7 @@ function renderFeed() {
   const list = feed.filter(l => (filter === "All" || l.pieces.some(p => p.category === filter)) &&
     (!q || [l.title, l.summary, ...l.pieces.flatMap(p => [p.name, p.brand, p.colour, p.material, p.category])].join(" ").toLowerCase().includes(q)));
   const el = $("#feed");
-  if (!feed.length) {
-    if (WEB) { el.innerHTML = `<div class="empty-state"><span class="label">community feed</span><h3>the feed lives in the spotted app.</h3><p>posted looks, with every piece identified, are shared inside the app. open it to browse, or see your for you page here.</p><div style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn solid" href="${LIVE_APP}" target="_blank" rel="noopener noreferrer">open the app ↗</a><a class="btn" href="#explore">for you</a></div></div>`; return; }
-    el.innerHTML = `<div class="empty-state"><span class="label">The feed is empty</span><h3>Post the first look.</h3><p>Scan an outfit or beauty picture and share it. It appears here with every piece identified, for everyone who has access to this page.</p><a class="btn solid" href="#scan">Scan a look</a></div>`;
-    return;
-  }
+  if (!feed.length) { el.innerHTML = demoFeedHTML(); return; }
   if (!list.length) { el.innerHTML = `<div class="empty-state"><h3>Nothing matches “${esc(query || filter)}”.</h3><p>Try a colour, a material or a category.</p></div>`; return; }
   el.innerHTML = `<div class="grid">${list.map(cardHTML).join("")}</div>`;
 }
@@ -163,7 +159,7 @@ function lookHTML(l, pre) {
       <div class="q">Searching for <code>${esc(p.query || p.name)}</code></div></li>`;
   }).join("");
   return `<div class="look">
-    <div class="stage-col"><div class="stage"><img src="${esc(l.img)}" alt="${esc(l.summary || "Scanned look")}">${spots}</div><p class="stage-note">Numbers mark each identified piece (positions are approximate).</p></div>
+    <div class="stage-col">${l.img ? `<div class="stage"><img src="${esc(l.img)}" alt="${esc(l.summary || "Scanned look")}">${spots}</div><p class="stage-note">Numbers mark each identified piece (positions are approximate).</p>` : `<div class="stage demo-stage">${l.pieces.map((p, i) => `<button type="button" class="dtile" data-spot="${i}" aria-label="Piece ${i + 1}: ${esc(p.name)}">${tileHTML(p)}<span class="dnum" aria-hidden="true">${i + 1}</span></button>`).join("")}</div><p class="stage-note">demo look: pieces identified in advance. scan your own photo to see ai identification.</p>`}</div>
     <div><div class="look-head"><span class="label">${l.pieces.length} pieces identified</span><h2 ${pre === "sheet" ? 'id="look-title"' : ""}>${esc(l.title || "Your look")}</h2><p>${esc(l.summary || "")}</p></div>
       <div class="whole"><span>Want exact visual matches?</span><a class="btn small" href="https://lens.google.com/" target="_blank" rel="noopener noreferrer">Search the whole look on Google Lens ↗</a></div>
       ${l.pieces.length ? `<ol class="pieces">${pieces}</ol>` : `<p class="alert">No fashion or beauty pieces were found in this image. Try a clearer or closer photo.</p>`}</div>
@@ -371,14 +367,16 @@ async function postLook() {
 
 /* ---------- Colours, kinds, taste ---------- */
 const COLOURS = { black: "#1b1a19", white: "#f4f1ea", ivory: "#efe6d6", cream: "#efe6d6", beige: "#d8c7ae", camel: "#b98a57", tan: "#c19a6b", brown: "#6b4a33", chocolate: "#4a3326", burgundy: "#6e1f2c", wine: "#6e1f2c", red: "#b3262e", pink: "#e7a9b5", blush: "#e9c2b8", nude: "#d9b8a0", taupe: "#a8998a", green: "#4f6b4a", olive: "#6b6a3f", khaki: "#a39a72", navy: "#1f2a44", blue: "#5577aa", denim: "#5d7aa0", grey: "#9a958d", gray: "#9a958d", charcoal: "#3b3a38", silver: "#c7c7c7", gold: "#c9a54e", leopard: "#b0874d", lilac: "#b8a6cc", purple: "#6d4f8a", yellow: "#e1c35a", orange: "#d27a3a" };
-const MATERIALS = ["leather", "suede", "wool", "cashmere", "denim", "silk", "satin", "knit", "cotton", "linen", "faux fur", "fur", "shearling", "tweed", "velvet", "patent", "pearl"];
+const MATERIALS = ["leather", "suede", "wool", "cashmere", "denim", "silk", "satin", "knit", "cotton", "linen", "faux fur", "fur", "shearling", "tweed", "velvet", "patent", "pearl", "corduroy"];
 const KIND = { coat: "Outerwear", jacket: "Outerwear", blazer: "Outerwear", trench: "Outerwear", bomber: "Outerwear", sweater: "Knitwear", cardigan: "Knitwear", jumper: "Knitwear", turtleneck: "Knitwear", top: "Tops", shirt: "Tops", tee: "Tops", tank: "Tops", blouse: "Tops", dress: "Dresses", skirt: "Bottoms", jeans: "Bottoms", trousers: "Bottoms", pants: "Bottoms", shorts: "Bottoms", boots: "Shoes", heels: "Shoes", loafers: "Shoes", sneakers: "Shoes", mules: "Shoes", flats: "Shoes", bag: "Bags", tote: "Bags", clutch: "Bags", earrings: "Jewellery", necklace: "Jewellery", ring: "Jewellery", bracelet: "Jewellery", watch: "Accessories", sunglasses: "Eyewear", glasses: "Eyewear", scarf: "Accessories", headscarf: "Accessories", belt: "Accessories", lipstick: "Beauty", tint: "Beauty", parfum: "Beauty", perfume: "Beauty", clip: "Hair", bow: "Hair" };
 const wordRe = w => new RegExp("\\b" + w.replace(/[-]/g, "\\-") + "\\b");
 function colourOf(text) { const t = String(text || "").toLowerCase(); return Object.keys(COLOURS).find(k => wordRe(k).test(t)) || ""; }
 function kindOf(text) { const t = String(text || "").toLowerCase(); const k = Object.keys(KIND).find(w => wordRe(w).test(t)); return k ? KIND[k] : ""; }
 function kindWord(p) {
   const t = String(p.name || "").toLowerCase(); let best = "", at = -1;
-  Object.keys(KIND).forEach(w => { const m = t.match(wordRe(w)); if (m && m.index >= at) { at = m.index; best = w; } });
+  let pref = "", pat = -1;
+  Object.keys(KIND).forEach(w => { const m = t.match(wordRe(w)); if (m) { if (m.index >= at) { at = m.index; best = w; } if (KIND[w] === p.category && m.index >= pat) { pat = m.index; pref = w; } } });
+  if (pref) return pref;
   return best || String(p.category || "piece").toLowerCase();
 }
 const swatch = text => COLOURS[colourOf(text)] || "#e3dbd0";
@@ -470,12 +468,12 @@ function renderBoards() {
   const el = $("#saved-out");
   if (openBoard) return renderBoard(el);
   if (!savedPieces.length && !boards.length) {
-    el.innerHTML = `<div class="empty-state"><span class="label">nothing saved yet</span><h3>start your first board.</h3><p>open a look or your for you page and press save on any piece. sort what you find into boards like “fall 2026” or “wishlist”.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn solid" href="#explore">see for you</a><a class="btn" href="#scan">scan a look</a></div></div>`;
+    el.innerHTML = `<div class="empty-state"><span class="label">nothing saved yet</span><h3>start your first board.</h3><p>open a look or your for you page and press save on any piece. sort what you find into boards like “fall 2026” or “wishlist”.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn solid" type="button" id="load-demo">load 7 demo boards</button><a class="btn" href="#explore">see for you</a><a class="btn" href="#scan">scan a look</a></div></div>`;
     return;
   }
   const cards = [{ id: "all", name: "all saved", keys: savedPieces.map(p => p.key) }, ...boards];
   el.innerHTML = `<div class="boards">${cards.map(b => `<button class="board" type="button" data-board="${esc(b.id)}">${coverHTML(b.keys, 4)}<span class="board-name">${esc(b.name)}</span><span class="board-count">${plural(b.keys.length, "piece")}</span></button>`).join("")}
-    <form class="board new-board" id="new-board"><span class="label">new board</span><label class="sr-only" for="nb-name">Board name</label><input id="nb-name" type="text" maxlength="40" placeholder="e.g. fall 2026"><button class="btn solid small" type="submit">create board</button></form></div>`;
+    <form class="board new-board" id="new-board"><span class="label">new board</span><label class="sr-only" for="nb-name">Board name</label><input id="nb-name" type="text" maxlength="40" placeholder="e.g. fall 2026"><button class="btn solid small" type="submit">create board</button></form></div>${demoLoaded() ? "" : `<p class="hint" style="margin-top:28px">want to see how boards work? <button class="linkish" type="button" id="load-demo">load the 7 demo boards</button></p>`}`;
 }
 function pieceCard(p, boardId) {
   return `<article class="pcard">${tileHTML(p)}<div class="pcard-body"><b>${esc(p.name)}</b><span class="meta">${esc([p.category, p.colour, p.brand].filter(Boolean).join(" · ").toLowerCase())}</span>
@@ -582,7 +580,7 @@ function rankCatalog() {
   }).sort((a, b) => b.score - a.score);
 }
 function rankLooks() {
-  return feed.map(l => ({ l, s: l.pieces.reduce((a, p) => a + (taste.cat[p.category] || 0) + (taste.col[colourOf((p.colour || "") + " " + p.name)] || 0), 0) }))
+  return (feed.length ? feed : DEMO).map(l => ({ l, s: l.pieces.reduce((a, p) => a + (taste.cat[p.category] || 0) + (taste.col[colourOf((p.colour || "") + " " + p.name)] || 0), 0) }))
     .sort((a, b) => b.s - a.s).map(x => x.l);
 }
 function pickCard(p, i) {
@@ -603,7 +601,7 @@ function renderExplore() {
     <div class="taste-actions">${cap.sample ? `<button class="btn solid" type="button" id="ai-refresh" ${aiBusy ? "disabled" : ""}>${aiBusy ? "styling your picks…" : (ai.length ? "refresh my picks" : "personalise with ai")}</button>` : ""}<a class="btn" href="#scan">scan a look</a></div></div>
     <h2 class="ex-title">picked for you</h2>
     <div class="picks">${currentPicks.map(pickCard).join("")}</div>
-    ${looks.length ? `<h2 class="ex-title">looks like your style</h2><div class="grid">${looks.map(cardHTML).join("")}</div>` : ""}`;
+    ${looks.length ? `<h2 class="ex-title">looks like your style</h2><div class="grid">${looks.map(l => l.demo ? demoCardHTML(l) : cardHTML(l)).join("")}</div>` : ""}`;
 }
 async function refreshAI() {
   if (!cap.sample || aiBusy) return;
@@ -633,6 +631,96 @@ $("#explore-out").addEventListener("click", e => {
   const sp = e.target.closest("[data-pick]");
   if (sp) { const p = currentPicks[+sp.dataset.pick]; if (p) openPicker({ key: "pick|" + p.name, name: p.name, brand: "", category: p.category, colour: p.colour, material: p.material, query: p.query || p.name, look: "for you" }, () => renderExplore()); return; }
   const o = e.target.closest("[data-open]"); if (o) openLook(feed.find(l => l.id === o.dataset.open), o);
+});
+
+/* ---------- Demo looks & boards (pieces identified in advance, no photos) ---------- */
+const P = (name, category, colour, material, brand, brandConfidence, query) => ({ name, category, colour, material: material || "", brand: brand || null, brandConfidence: brand ? (brandConfidence || "medium") : null, query: query || ((brand ? brand.toLowerCase() + " " : "") + name) });
+const DEMO = [
+  { id: "demo-croc", title: "croc & leopard", summary: "burgundy croc leather over black tailoring, gold jewellery and a leopard scarf.", pieces: [
+    P("burgundy croc-embossed leather jacket", "Outerwear", "burgundy", "leather"),
+    P("black wide-leg pleated trousers", "Bottoms", "black", "wool"),
+    P("black leather flap shoulder bag", "Bags", "black", "leather", "Chanel", "high"),
+    P("black quilted cap-toe ballet flats with bow", "Shoes", "black", "leather", "Chanel", "high"),
+    P("tortoiseshell aviator sunglasses, green lenses", "Eyewear", "brown", "", "Gucci", "medium"),
+    P("chunky gold hoop earrings", "Jewellery", "gold", ""),
+    P("leopard print silk scarf", "Accessories", "leopard", "silk"),
+    P("gold spiked bangle bracelet", "Jewellery", "gold", "") ] },
+  { id: "demo-suede", title: "suede season", summary: "tan suede jacket and knee boots with black basics and a beaded evening bag.", pieces: [
+    P("tan suede cropped button jacket", "Outerwear", "tan", "suede"),
+    P("black short-sleeve mock-neck top", "Tops", "black", "knit"),
+    P("black flared trousers", "Bottoms", "black", ""),
+    P("tan suede knee-high boots with stacked heel", "Shoes", "tan", "suede"),
+    P("black beaded satin shoulder bag", "Bags", "black", "satin", "Miu Miu", "medium"),
+    P("brown oval sunglasses", "Eyewear", "brown", ""),
+    P("vintage gold watch with brown strap", "Accessories", "gold", "") ] },
+  { id: "demo-blue", title: "blue & brown", summary: "a blue zip knit with chocolate cords, a suede bag and retro sneakers.", pieces: [
+    P("blue ribbed zip-up knit cardigan", "Knitwear", "blue", "wool"),
+    P("white ribbed tank top", "Tops", "white", "cotton"),
+    P("chocolate corduroy straight-leg trousers", "Bottoms", "brown", "corduroy"),
+    P("chocolate suede top-handle bag with belt", "Bags", "brown", "suede"),
+    P("tortoiseshell cat-eye sunglasses", "Eyewear", "brown", ""),
+    P("blue clover station bracelet", "Jewellery", "blue", ""),
+    P("blue suede retro sneakers with cream stripes", "Shoes", "blue", "suede", "adidas", "high") ] },
+  { id: "demo-coffee", title: "coffee run", summary: "black tee, white wide jeans, a woven tote and suede clogs.", pieces: [
+    P("black long-sleeve fitted tee", "Tops", "black", "cotton"),
+    P("white wide-leg jeans", "Bottoms", "white", "denim"),
+    P("grey knit sweater worn over the shoulders", "Knitwear", "grey", "wool"),
+    P("dark brown woven leather tote", "Bags", "brown", "leather"),
+    P("taupe suede clogs", "Shoes", "taupe", "suede"),
+    P("brown oval sunglasses", "Eyewear", "brown", ""),
+    P("tortoiseshell claw clip", "Hair", "brown", ""),
+    P("solitaire pendant necklace", "Jewellery", "silver", "") ] },
+  { id: "demo-bandana", title: "bandana knit", summary: "a chunky black knit with a paisley bandana, white denim and woven flats.", pieces: [
+    P("black chunky knit crewneck sweater", "Knitwear", "black", "wool"),
+    P("olive paisley bandana scarf", "Accessories", "olive", "cotton"),
+    P("white crew-neck t-shirt", "Tops", "white", "cotton"),
+    P("white wide-leg jeans", "Bottoms", "white", "denim"),
+    P("dark brown woven leather tote", "Bags", "brown", "leather"),
+    P("black woven leather ballet flats", "Shoes", "black", "leather", "Bernardo", "medium"),
+    P("tortoiseshell oval glasses", "Eyewear", "brown", ""),
+    P("gold oval clip-on earrings", "Jewellery", "gold", "") ] },
+  { id: "demo-check", title: "check trench", summary: "a checked trench over a white tee and jeans, loafers and a black bucket bag.", pieces: [
+    P("plaid check trench coat", "Outerwear", "beige", "cotton", "The Row", "medium"),
+    P("white fitted t-shirt", "Tops", "white", "cotton"),
+    P("white wide-leg jeans", "Bottoms", "white", "denim"),
+    P("black leather bucket shoulder bag", "Bags", "black", "leather"),
+    P("black leather penny loafers", "Shoes", "black", "leather"),
+    P("tortoiseshell rectangular glasses", "Eyewear", "brown", "", "Saint Laurent", "low"),
+    P("gold rectangular watch with black strap", "Accessories", "gold", ""),
+    P("black leather belt with gold buckle", "Accessories", "black", "leather") ] },
+  { id: "demo-travel", title: "travel day", summary: "a black belted trench, grey wool trousers, suede loafers and a woven hobo.", pieces: [
+    P("black belted trench coat", "Outerwear", "black", "cotton"),
+    P("white fitted t-shirt", "Tops", "white", "cotton"),
+    P("grey wool wide-leg trousers", "Bottoms", "grey", "wool"),
+    P("chocolate woven suede hobo bag", "Bags", "brown", "suede"),
+    P("chocolate suede penny loafers", "Shoes", "brown", "suede"),
+    P("tortoiseshell oval glasses", "Eyewear", "brown", "") ] },
+];
+DEMO.forEach(l => { l.demo = true; });
+const isWeb = () => typeof WEB !== "undefined" && WEB;
+function demoCollage(l) { return `<span class="collage">${l.pieces.slice(0, 4).map(tileHTML).join("")}</span>`; }
+function demoCardHTML(l) {
+  return `<article class="card"><button type="button" data-demo="${esc(l.id)}" aria-label="Open demo look: ${esc(l.title)}, ${l.pieces.length} pieces identified"><span class="ph">${demoCollage(l)}<span class="over">${l.pieces.length} pieces identified</span></span><span class="cap"><b>${esc(l.title)}</b><span>demo · ${esc([...new Set(l.pieces.map(p => p.category))].slice(0, 3).join(" · "))}</span></span></button></article>`;
+}
+function demoFeedHTML() {
+  return `<p class="demo-note"><span class="label">demo looks</span><span>${isWeb() ? "these looks show how spotted works. scanning your own photos runs in the spotted app." : "the feed is empty, so here are demo looks. scan and post your own to fill it."}</span></p><div class="grid">${DEMO.map(demoCardHTML).join("")}</div>`;
+}
+const demoLoaded = () => DEMO.every(l => boards.some(b => b.id === "bd-" + l.id));
+function loadDemoBoards() {
+  DEMO.slice().reverse().forEach(l => {
+    const keys = l.pieces.map((p, i) => {
+      const key = `${l.id}|${i}`;
+      savePiece({ key, name: p.name, brand: p.brand || "", category: p.category, colour: p.colour, material: p.material, query: p.query, look: l.title });
+      return key;
+    });
+    if (!boards.some(b => b.id === "bd-" + l.id)) boards.unshift({ id: "bd-" + l.id, name: l.title, keys, createdAt: Date.now(), demo: true });
+  });
+  persistBoards(); setSavedCount(); toast("7 demo boards added");
+}
+document.addEventListener("click", e => {
+  if (e.target.id === "load-demo") { loadDemoBoards(); renderBoards(); return; }
+  const d = e.target.closest("[data-demo]");
+  if (d) openLook(DEMO.find(l => l.id === d.dataset.demo), d);
 });
 
 /* ---------- Scan history ---------- */

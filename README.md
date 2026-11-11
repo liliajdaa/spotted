@@ -14,6 +14,7 @@ By Lilia Jdaa Maniari — individual final project, November 2026.
 | Design, hero video, all pages | yes | yes |
 | Describe a piece → shop links | yes | yes |
 | Boards and saved pieces | in this browser | on your account |
+| Demo looks and 7 demo boards | yes | yes (when the feed is empty) |
 | For you page | yes (learns from this browser) | yes, plus AI picks |
 | AI scanning of images | links to the app | yes |
 | Sign in with Google, scan history, community feed | links to the app | yes |
